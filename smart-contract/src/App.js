@@ -5,10 +5,10 @@ import Web3 from 'web3';
 
 const fs = require('fs');
 const App = () => {
-    const contractAddress = '0x9aE02Be91aB2f4Bb43F84638B7FdA677DafB6B36';
+    const contractAddress = '0x7419c0A8fbAd407C9b88AF63c885c1b173b8f739';
     const contractABI =
       JSON.parse(fs.readFileSync('./build/contracts/VotingSystem.json', 'utf8'));
-    const web3 = new Web3(window.ethereum || 'http://localhost:8545');
+    const web3 = new Web3(window.ethereum || 'http://127.0.0.1:7545');
     const contract = new web3.eth.Contract(contractABI, contractAddress);
 
     return (

@@ -3,42 +3,44 @@ pragma solidity >=0.4.22 <0.9.0;
 
 contract VotingSystem {
     address public owner;
-    mapping(address => uint) public voterCounts; // Tracks number of votes per address
+    mapping(address => uint) public voterCounts;
     mapping(uint => uint) public votesReceived;
     string[] public proposalList;
-    uint public votePrice = 0.1 ether; // Initial cost to vote
+    uint public votePrice = 0.1 ether;
 
+    event ProposalAdded(string proposal);
+    event VoteReceived(string proposal, address voter);
+
+    constructor() public {
+        owner = msg.sender;
+        votePrice = 0.1 ether;
+    }
+
+    // Allow only owner to perform some actions
     modifier onlyOwner() {
         require(msg.sender == owner, "Not owner");
         _;
     }
 
-    event VoteReceived(string proposal, address voter);
-
-    constructor() public {
-        owner = msg.sender;
-    }
-
-    function addProposal(string memory newProposal) public onlyOwner {
+    // Allow any user to add proposals
+    function addProposal(string memory newProposal) public {
         proposalList.push(newProposal);
+        emit ProposalAdded(newProposal);
     }
 
-    // Function to allow voting, with the cost increasing exponentially with each additional vote
     function voteForProposal(uint proposal) public payable {
         require(proposal < proposalList.length, "Invalid proposal");
         uint numVotes = voterCounts[msg.sender];
-        uint costForNextVote = votePrice * (2 ** numVotes); // Cost doubles each time
 
-        require(msg.value >= costForNextVote, "Insufficient funds sent");
+        require(msg.value >= votePrice, "Insufficient funds sent");
 
-        voterCounts[msg.sender]++;
         votesReceived[proposal]++;
+        voterCounts[msg.sender]++;
         emit VoteReceived(proposalList[proposal], msg.sender);
 
-        // Refund any excess ether sent
-        if (msg.value > costForNextVote) {
+        if (msg.value >= votePrice) {
             address payable sender = address(uint160(msg.sender));
-            sender.transfer(msg.value - costForNextVote);
+            sender.transfer(msg.value - votePrice);
         }
     }
 
@@ -51,7 +53,7 @@ contract VotingSystem {
         votePrice = newPrice;
     }
 
-    function donate() public payable {
-        // Function to receive donations
+    function getProposalListLength() public view returns (uint) {
+        return proposalList.length;
     }
 }
