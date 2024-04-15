@@ -62,7 +62,7 @@ const VoteComponent = ({ contract, web3 }) => {
             console.log('No proposal selected');
             return;
         }
-
+        
         try {
             const voteCount = await contract.methods.getVoteCount(selectedProposal).call();
             console.log(`Votes for proposal ${selectedProposal}: ${voteCount}`);
@@ -71,13 +71,15 @@ const VoteComponent = ({ contract, web3 }) => {
             console.error('Error fetching vote count:', error);
         }
     };
-
+    
     return (
-        <div>
-            <h2 className="text-xl font-bold mb-4">Proposals:</h2>
-            <ul>
+        <div className="p-4">
+            <h2 className="text-2xl font-bold mb-4">Proposals:</h2>
+            <ul className="mb-4">
                 {proposalList.map((proposal, index) => (
-                    <li key={index}>{proposal}</li>
+                    <li key={index} className="mb-2">
+                        {proposal}
+                    </li>
                 ))}
             </ul>
             <input
@@ -85,38 +87,47 @@ const VoteComponent = ({ contract, web3 }) => {
                 value={newProposal}
                 onChange={(e) => setNewProposal(e.target.value)}
                 placeholder="Enter new proposal"
+                className="border border-gray-300 rounded-md px-3 py-2 mb-4"
             />
-            <button onClick={handleAddProposal}>Add Proposal</button>
-            <h2 className="text-xl font-bold mt-8 mb-4">Vote</h2>
-            <label className="mr-2">Select Proposal:</label>
-            <select
-                className="border border-gray-300 rounded-md px-2 py-1"
-                value={selectedProposal}
-                onChange={(e) => setSelectedProposal(e.target.value)}
-            >
-                <option value="">Select</option>
-                {proposalList.map((proposal, index) => (
-                    <option key={index} value={index}>
-                        {proposal}
-                    </option>
-                ))}
-            </select>
             <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
+                onClick={handleAddProposal}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+            >
+                Add Proposal
+            </button>
+            <h2 className="text-2xl font-bold mt-8 mb-4">Vote</h2>
+            <div className="flex items-center mb-4">
+                <label htmlFor="proposal" className="mr-2">Select Proposal:</label>
+                <select
+                    id="proposal"
+                    className="border border-gray-300 rounded-md px-3 py-2"
+                    value={selectedProposal}
+                    onChange={(e) => setSelectedProposal(e.target.value)}
+                >
+                    <option value="">Select</option>
+                    {proposalList.map((proposal, index) => (
+                        <option key={index} value={index}>
+                            {proposal}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <button
                 onClick={handleVote}
                 disabled={!selectedProposal}
+                className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4 ${!selectedProposal && 'opacity-50 cursor-not-allowed'}`}
             >
                 Vote
             </button>
             <button
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-2"
                 onClick={handleGetVoteCount}
                 disabled={!selectedProposal}
+                className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ${!selectedProposal && 'opacity-50 cursor-not-allowed'}`}
             >
                 Get Vote Count
             </button>
         </div>
-    );
+    );    
 };
 
 export default VoteComponent;
