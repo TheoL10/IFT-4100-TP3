@@ -1,4 +1,5 @@
-# IFT-4100-TP3
+#!/bin/bash
+
 npm install
 truffle compile --all
 cp build/contracts/VotingSystem.json src/VotingSystem.json
