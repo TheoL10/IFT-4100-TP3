@@ -4,21 +4,26 @@ import VoteComponent from './components/Vote.js';
 import Web3 from 'web3';
 import VotingSystemJSON from './VotingSystem.json';
 
+// Initialise les variables du réseau
 const networkId = '5777';
 const networkInfo = VotingSystemJSON.networks[networkId];
 
 // Affiche les liens accessibles à l'utilisateur
 function LandingPage() {
   
+  // Initialise web3 et le contrat
   const [web3, setWeb3] = useState(null);
   const [contract, setContract] = useState(null);
 
+  // Récupère les données du contrat et de l'utilisateur
   React.useEffect(() => {
     async function loadBlockchainData() {
       if (window.ethereum) {
         try {
+          // Récupère les comptes de l'utilisateur
           await window.ethereum.request({ method: 'eth_requestAccounts' });
           const web3Instance = new Web3(window.ethereum);
+          // Récupère les données du contrat
           const contractAddress = networkInfo.address;
           const contractABI = VotingSystemJSON.abi;
           const contractInstance = new web3Instance.eth.Contract(contractABI, contractAddress);
@@ -28,7 +33,7 @@ function LandingPage() {
           console.error("Error enabling ethereum", error);
         }
       } else {
-        console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+        console.log('Please use Metamask!');
       }
     }
 
@@ -40,7 +45,7 @@ function LandingPage() {
   }
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
-      <h1 className="text-4xl font-bold text-gray-800 mb-8">Bonjour les cryptos et tout</h1>
+      <h1 className="text-4xl font-bold text-gray-800 mb-8">Welcome to our WEB3 vote system</h1>
       <VoteComponent contract={contract} web3={web3}/>
     </div>
   );

@@ -1,24 +1,30 @@
 import React, { useState, useEffect } from 'react';
 
 const VoteComponent = ({ contract, web3 }) => {
+    // Initialisation des variables
     const [proposalList, setProposalList] = useState([]);
     const [selectedProposal, setSelectedProposal] = useState('');
     const [newProposal, setNewProposal] = useState('');
     const [account, setAccount] = useState('');
 
+    // Récupère les données quand le contrat et web3 sont disponibles
     useEffect(() => {
         async function fetchData() {
+            // Si le contrat n'est pas disponible quitte la fonction
             if (!contract) return;
 
             try {
+                // Récupère la taille de la liste de proposition
                 const listLength = await contract.methods.getProposalListLength().call();
                 const proposals = [];
+                // Parcours la liste de propositions
                 for (let i = 0; i < listLength; i++) {
                     const proposal = await contract.methods.proposalList(i).call();
                     proposals.push(proposal);
                 }
+                // Met à jour la liste de proposition
                 setProposalList(proposals);
-                // Fetch accounts from web3 instance directly
+                // Récupère le compte de l'utilisateur et le met à jour
                 const accounts = await web3.eth.getAccounts();
                 setAccount(accounts[0]);
             } catch (error) {
@@ -28,57 +34,63 @@ const VoteComponent = ({ contract, web3 }) => {
         fetchData();
     }, [contract, web3]);
 
+    // Gère le vote
     const handleVote = async () => {
         console.log(selectedProposal);
         try {
-            const numVotes = await contract.methods.voterCounts(account).call();
+            // Récupère le coût d'un vote
             const voteCost = web3.utils.toWei((0.1).toString(), 'ether');
 
+            // Envoie la transaction pour voter au contrat
             const response = await contract.methods.voteForProposal(selectedProposal).send({
                 from: account,
                 value: voteCost,
-                gas: 1000000 // You might adjust this value based on your needs
+                gas: 1000000
             });
-            console.log(response);
-            console.log('Vote successful!');
+            alert('Vote successful!');
         } catch (error) {
             console.error('Error voting:', error);
         }
     };
 
+    // Gère l'ajout d'une proposition
     const handleAddProposal = async () => {
         try {
+            // Envoi la propositon au contrat
             await contract.methods.addProposal(newProposal).send({ from: account });
-            console.log('Proposal added!');
+            alert('Proposal added!');
+            // Met à jour les propositions
             setNewProposal('');
-            setProposalList([...proposalList, newProposal]); // Update local state to reflect the new proposal
+            setProposalList([...proposalList, newProposal]);
         } catch (error) {
             console.error('Error adding proposal:', error);
         }
     };
 
+    // Gère la récupération du nombre de vote pour une proposition
     const handleGetVoteCount = async () => {
+        // Si aucune proposition n'est sélectionné quitte la fonction
         if (selectedProposal === '') {
-            console.log('No proposal selected');
+            alert('No proposal selected');
             return;
         }
-        
+
         try {
+            // Récupère et affiche le nombre de vote
             const voteCount = await contract.methods.getVoteCount(selectedProposal).call();
-            console.log(`Votes for proposal ${selectedProposal}: ${voteCount}`);
-            alert(`Votes for proposal ${selectedProposal}: ${voteCount}`);
+            alert(`Proposal: ${selectedProposal}, number of votes: ${voteCount}`);
         } catch (error) {
             console.error('Error fetching vote count:', error);
         }
     };
-    
+
     return (
         <div className="p-4">
             <h2 className="text-2xl font-bold mb-4">Proposals:</h2>
             <ul className="mb-4">
                 {proposalList.map((proposal, index) => (
                     <li key={index} className="mb-2">
-                        {proposal}
+                        {index}: {proposal}
                     </li>
                 ))}
             </ul>
@@ -107,7 +119,7 @@ const VoteComponent = ({ contract, web3 }) => {
                     <option value="">Select</option>
                     {proposalList.map((proposal, index) => (
                         <option key={index} value={index}>
-                            {proposal}
+                            {index}: {proposal}
                         </option>
                     ))}
                 </select>
@@ -127,7 +139,7 @@ const VoteComponent = ({ contract, web3 }) => {
                 Get Vote Count
             </button>
         </div>
-    );    
+    );
 };
 
 export default VoteComponent;
